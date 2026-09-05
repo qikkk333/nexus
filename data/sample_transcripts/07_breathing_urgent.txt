@@ -1,0 +1,35 @@
+[TRANSCRIPT: Breathing Difficulty — Single Rule, URGENT]
+[EXPECTED OUTCOME: RULE_BREATHING — URGENT — Urgent Care]
+[SCENARIO: Patient has gradual-onset breathing difficulty, SpO2 within normal range, able to speak normally]
+
+---
+
+Patient: I've been feeling a bit short of breath over the past few hours. It's been getting worse gradually. I can still talk fine.
+
+TriageGuard: Do you know your current oxygen saturation reading (SpO2 %)? If not, say "unknown".
+
+Patient: I checked it with my home monitor, it's 95%.
+
+---
+
+[RESOLUTION]
+Relevant condition: breathing_difficulty
+
+Extracted fields:
+  onset: gradual                         (confidence: 0.93)
+  oxygen_saturation: 95                  (confidence: 0.97)
+  able_to_speak_full_sentences: true     (confidence: 0.90)
+  cyanosis: false                        (confidence: 0.75)
+  use_of_accessory_muscles: false        (confidence: 0.70)
+
+No red flags triggered.
+Rule matched: RULE_BREATHING
+  onset == 'gradual' → URGENT, Urgent Care
+  (oxygen_saturation 95 >= 92, so IMMEDIATE threshold not met)
+
+TRIAGE NOTE
+Urgency: URGENT
+Department: Urgent Care
+Applied Rule: Gradual-onset breathing difficulty with SpO2 >= 92% and maintained speech — URGENT, Urgent Care.
+Patient reported: gradual-onset shortness of breath worsening over several hours, SpO2 95%, able to speak in full sentences, no cyanosis or use of accessory muscles reported.
+Rule ID: RULE_BREATHING

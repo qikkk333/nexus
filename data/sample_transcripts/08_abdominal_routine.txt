@@ -1,0 +1,35 @@
+[TRANSCRIPT: Abdominal Pain — Single Rule, ROUTINE]
+[EXPECTED OUTCOME: RULE_ABDOMINAL — ROUTINE — General Practice]
+[SCENARIO: Patient has mild stomach cramping, low pain score, short duration, no red flags]
+
+---
+
+Patient: I've got some stomach cramps, pretty mild, maybe a 2 out of 10. It's been going on for about 2 hours and it's around the belly button area.
+
+TriageGuard: Is the patient's abdomen hard or rigid to the touch?
+
+Patient: No, it's soft, nothing unusual.
+
+---
+
+[RESOLUTION]
+Relevant condition: abdominal_pain
+
+Extracted fields:
+  pain_score: 2             (confidence: 0.95)
+  duration_hours: 2         (confidence: 0.93)
+  pain_location: central / around belly button (confidence: 0.91)
+  rigid_abdomen: false      (confidence: 0.92)
+  blood_in_stool_or_vomit: null (confidence: 0.0)
+
+No red flags triggered.
+Rule matched: RULE_ABDOMINAL
+  pain_score 2 < 4 and duration_hours 2 < 6 → default → ROUTINE, General Practice
+
+TRIAGE NOTE
+Urgency: ROUTINE
+Department: General Practice
+Applied Rule: Mild abdominal discomfort, pain below 4/10, short duration — ROUTINE, General Practice.
+Patient reported: mild stomach cramps 2/10, located around the belly button, present for approximately 2 hours, abdomen soft and not rigid.
+Fields not collected: blood_in_stool_or_vomit
+Rule ID: RULE_ABDOMINAL

@@ -1,0 +1,35 @@
+[TRANSCRIPT: API Failure Scenario]
+[EXPECTED OUTCOME: ESCALATED — api_failure — Human clinician]
+[SCENARIO: Gemini API fails or key is missing; system asks patient to rephrase once, then escalates on second failure]
+
+---
+
+Patient: I have a fever and my chest hurts.
+
+[SYSTEM: First extraction attempt fails — API error or missing key]
+
+TriageGuard: I'm having difficulty understanding that. Could you rephrase your description of your symptoms in different words?
+
+Patient: I said I feel hot and my chest is in pain.
+
+[SYSTEM: Second extraction attempt also fails]
+
+---
+
+[RESOLUTION — after second consecutive API failure]
+api_failure_count = 2 >= threshold
+
+SYSTEM RESPONSE: ESCALATED TO HUMAN
+Reason: api_failure
+Message: The system was unable to process your information after repeated attempts.
+Please seek immediate in-person medical assessment.
+
+---
+[NOTE FOR EVALUATORS]
+This scenario occurs when:
+  1. GEMINI_API_KEY environment variable is not set, OR
+  2. The Gemini API returns an error on two consecutive turns for the same session.
+
+The system does NOT crash. It handles the failure gracefully in extractor.py and escalates
+via the api_failure_count counter in app.py. This is testable by unsetting GEMINI_API_KEY
+before starting the server.

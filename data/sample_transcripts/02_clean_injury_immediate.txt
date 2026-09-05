@@ -1,0 +1,34 @@
+[TRANSCRIPT: Clean Injury — Single Rule, IMMEDIATE]
+[EXPECTED OUTCOME: RULE_INJURY — IMMEDIATE — Emergency Department]
+[SCENARIO: Patient has a severe fall injury with high pain score, no ambiguity]
+
+---
+
+Patient: I fell down a flight of stairs about 20 minutes ago and landed on my right leg. The pain is about a 9 out of 10 — I can't put any weight on it.
+
+TriageGuard: I'm sorry to hear that. Is there any heavy or uncontrolled bleeding that hasn't stopped?
+
+Patient: No bleeding, just severe pain and some swelling.
+
+---
+
+[RESOLUTION]
+All required fields extracted with high confidence:
+  injury_location: right leg (confidence: 0.95)
+  mechanism: fall down stairs (confidence: 0.97)
+  pain_score: 9             (confidence: 0.98)
+  head_injury_loss_of_consciousness: false (confidence: 0.80)
+  active_major_bleeding: false (confidence: 0.92)
+  suspected_spinal: null    (confidence: 0.0)
+
+No red flags triggered.
+Rule matched: RULE_INJURY — pain_score 9 >= 8 → IMMEDIATE, Emergency Department.
+Note generated and verified.
+
+TRIAGE NOTE
+Urgency: IMMEDIATE
+Department: Emergency Department
+Applied Rule: Pain score >= 8/10, indicating severe injury requiring immediate assessment — IMMEDIATE, Emergency Department.
+Patient reported: fall down a flight of stairs 20 minutes ago, right leg injured, pain 9/10, unable to bear weight, swelling present, no active bleeding.
+Fields not collected: suspected_spinal
+Rule ID: RULE_INJURY

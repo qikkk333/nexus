@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TriageGuard — Patient Intake</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: #1a3a5c;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header .logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    header .subtitle {
+      font-size: 0.85rem;
+      opacity: 0.75;
+    }
+
+    header .track-id {
+      margin-left: auto;
+      font-size: 0.75rem;
+      opacity: 0.6;
+      font-family: monospace;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .disclaimer {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: #856404;
+    }
+
+    #chat-window {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 4px 0;
+    }
+
+    .bubble-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bubble-wrap.patient { align-items: flex-end; }
+    .bubble-wrap.assistant { align-items: flex-start; }
+
+    .bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .bubble-wrap.patient .bubble {
+      background: #1a3a5c;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble-wrap.assistant .bubble {
+      background: #fff;
+      color: #1a1a1a;
+      border: 1px solid #dde3ea;
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-wrap.assistant .bubble.resolved {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    .bubble-wrap.assistant .bubble.escalated {
+      background: #fce4e4;
+      border-color: #f44336;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .badge.IMMEDIATE { background: #f44336; color: #fff; }
+    .badge.URGENT    { background: #ff9800; color: #fff; }
+    .badge.ROUTINE   { background: #4caf50; color: #fff; }
+    .badge.ESCALATED { background: #9c27b0; color: #fff; }
+
+    #input-area {
+      display: flex;
+      gap: 8px;
+    }
+
+    #msg-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #c7d2dc;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      outline: none;
+      resize: none;
+      min-height: 44px;
+      max-height: 120px;
+    }
+
+    #msg-input:focus { border-color: #1a3a5c; }
+
+    #send-btn {
+      background: #1a3a5c;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 0 22px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #send-btn:disabled { background: #9ab0c8; cursor: not-allowed; }
+
+    #reset-btn {
+      background: none;
+      border: 1px solid #c7d2dc;
+      border-radius: 24px;
+      padding: 0 16px;
+      font-size: 0.85rem;
+      color: #555;
+      cursor: pointer;
+    }
+
+    #reset-btn:hover { border-color: #888; }
+
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 14px;
+      border-bottom-left-radius: 4px;
+      max-width: 80px;
+    }
+
+    .typing span {
+      width: 7px;
+      height: 7px;
+      background: #9ab0c8;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.15s; }
+    .typing span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); }
+      40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="logo">TriageGuard</div>
+      <div class="subtitle">Patient Intake Triage Assistant</div>
+    </div>
+    <div class="track-id">TRACK_ID=PS01</div>
+  </header>
+
+  <div class="container">
+    <div class="disclaimer">
+      This system is an AI-assisted triage tool and does not provide medical diagnoses.
+      All urgency determinations are based on fixed clinical rules and must be reviewed by a qualified clinician.
+      In an emergency, call 999 / 911 immediately.
+    </div>
+
+    <div id="chat-window"></div>
+
+    <div id="input-area">
+      <textarea id="msg-input" placeholder="Describe your symptoms…" rows="1"></textarea>
+      <button id="reset-btn" title="Start new session">New</button>
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatWindow = document.getElementById('chat-window');
+    const msgInput  = document.getElementById('msg-input');
+    const sendBtn   = document.getElementById('send-btn');
+    const resetBtn  = document.getElementById('reset-btn');
+
+    let sessionId = '';
+
+    function scrollBottom() {
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function addBubble(role, text, state, urgency) {
+      const wrap = document.createElement('div');
+      wrap.className = `bubble-wrap ${role}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      if (state === 'resolved') bubble.classList.add('resolved');
+      if (state === 'escalated') bubble.classList.add('escalated');
+      bubble.textContent = text;
+      wrap.appendChild(bubble);
+
+      if (urgency) {
+        const badge = document.createElement('span');
+        badge.className = `badge ${urgency}`;
+        badge.textContent = urgency;
+        wrap.appendChild(badge);
+      }
+
+      if (state === 'escalated') {
+        const badge = document.createElement('span');
+        badge.className = 'badge ESCALATED';
+        badge.textContent = 'ESCALATED';
+        wrap.appendChild(badge);
+      }
+
+      chatWindow.appendChild(wrap);
+      scrollBottom();
+    }
+
+    function addTyping() {
+      const wrap = document.createElement('div');
+      wrap.className = 'bubble-wrap assistant';
+      wrap.id = 'typing-indicator';
+      wrap.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+      chatWindow.appendChild(wrap);
+      scrollBottom();
+      return wrap;
+    }
+
+    function removeTyping() {
+      const el = document.getElementById('typing-indicator');
+      if (el) el.remove();
+    }
+
+    function setInputEnabled(enabled) {
+      msgInput.disabled = !enabled;
+      sendBtn.disabled  = !enabled;
+    }
+
+    async function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      msgInput.value = '';
+      msgInput.style.height = 'auto';
+
+      addBubble('patient', text, 'collecting', null);
+      setInputEnabled(false);
+      const typing = addTyping();
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, message: text }),
+        });
+        const data = await res.json();
+        sessionId = data.session_id;
+
+        removeTyping();
+        addBubble('assistant', data.message, data.state, data.urgency || null);
+
+        if (data.state === 'resolved' || data.state === 'escalated') {
+          setInputEnabled(false);
+          msgInput.placeholder = 'Consultation complete — click "New" to start again.';
+        } else {
+          setInputEnabled(true);
+          msgInput.focus();
+        }
+      } catch (err) {
+        removeTyping();
+        addBubble('assistant', 'Network error — please try again.', 'collecting', null);
+        setInputEnabled(true);
+      }
+    }
+
+    async function resetSession() {
+      try {
+        const res = await fetch('/api/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
+        const data = await res.json();
+        sessionId = data.session_id;
+      } catch (_) {}
+      chatWindow.innerHTML = '';
+      msgInput.value = '';
+      msgInput.placeholder = 'Describe your symptoms…';
+      setInputEnabled(true);
+      msgInput.focus();
+      addBubble('assistant',
+        'Hello, I\'m TriageGuard. Please describe your symptoms and I will help assess the urgency of your situation.',
+        'collecting', null);
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    resetBtn.addEventListener('click', resetSession);
+
+    msgInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    msgInput.addEventListener('input', () => {
+      msgInput.style.height = 'auto';
+      msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+    });
+
+    resetSession();
+  </script>
+</body>
+</html>

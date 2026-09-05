@@ -1,0 +1,31 @@
+[TRANSCRIPT: Chest Pain with Radiation — Single Rule, IMMEDIATE]
+[EXPECTED OUTCOME: RULE_CHEST_PAIN — IMMEDIATE — Emergency Department]
+[SCENARIO: Patient describes classic cardiac-sounding chest pain with radiation to arm]
+
+---
+
+Patient: I've been having chest pain for the last 20 minutes. It's squeezing, about a 7 out of 10. It's also spreading to my left arm and jaw.
+
+TriageGuard: Are you sweating heavily, feeling nauseated, or dizzy along with the chest pain?
+
+Patient: Yes, I'm sweating a lot and I feel sick to my stomach.
+
+---
+
+[RESOLUTION]
+All required fields extracted with high confidence:
+  pain_score: 7             (confidence: 0.96)
+  duration_minutes: 20      (confidence: 0.92)
+  radiation: true           (confidence: 0.95)
+  diaphoresis: true         (confidence: 0.90)
+  syncope: false            (confidence: 0.70)
+
+Red flag: diaphoresis = true → IMMEDIATE ESCALATION triggered.
+(Note: even without the red flag, pain_score >= 6 and duration_minutes > 15 would independently resolve to IMMEDIATE.)
+
+TRIAGE NOTE
+Urgency: IMMEDIATE
+Department: Emergency Department
+Applied Rule: Chest pain with pain score >= 6/10, OR duration > 15 minutes, OR radiation to arm/jaw/back — IMMEDIATE, Emergency Department. Possible cardiac event.
+Patient reported: squeezing chest pain 7/10 for 20 minutes, radiating to left arm and jaw, accompanied by heavy sweating and nausea (diaphoresis red flag present).
+Rule ID: RULE_CHEST_PAIN

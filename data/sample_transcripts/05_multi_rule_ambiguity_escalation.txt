@@ -1,0 +1,35 @@
+[TRANSCRIPT: Multi-Rule Ambiguity — Escalation]
+[EXPECTED OUTCOME: ESCALATED — multi_rule_ambiguity — Human clinician]
+[SCENARIO: Patient has both fever and abdominal pain symptoms with sufficient data for both rules — ambiguity escalation fires]
+
+---
+
+Patient: I've had a fever of 38.8°C for two days. I'm also having bad stomach cramps, pain about a 6 out of 10 in my lower right abdomen. I'm 22 years old.
+
+TriageGuard: How long has the abdominal pain been going on?
+
+Patient: The stomach pain started about 8 hours ago. The fever started two days ago.
+
+---
+
+[RESOLUTION — after second turn]
+Relevant conditions: fever, abdominal_pain
+
+Extracted fields (fever):
+  temperature_celsius: 38.8 (confidence: 0.95)
+  duration_days: 2          (confidence: 0.93)
+  age_years: 22             (confidence: 0.97)
+  → plausible (all required fields above 0.6)
+
+Extracted fields (abdominal_pain):
+  pain_score: 6             (confidence: 0.94)
+  duration_hours: 8         (confidence: 0.91)
+  pain_location: lower right (confidence: 0.90)
+  → plausible (all required fields above 0.6)
+
+Multi-rule ambiguity check: both fever AND abdominal_pain are plausible with high-confidence data.
+Clinical note: Fever + right lower quadrant pain + 22-year-old is a classic appendicitis presentation requiring urgent human assessment — system correctly escalates rather than guessing.
+
+SYSTEM RESPONSE: ESCALATED TO HUMAN
+Reason: Multiple conditions appear plausible (Fever, Abdominal Pain).
+A human clinician is required to differentiate.

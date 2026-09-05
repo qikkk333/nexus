@@ -1,0 +1,35 @@
+[TRANSCRIPT: Infant Fever — Single Rule, IMMEDIATE]
+[EXPECTED OUTCOME: RULE_FEVER — IMMEDIATE — Emergency Department]
+[SCENARIO: Parent reports fever in a 2-month-old infant; infant age + any fever >= 38°C triggers IMMEDIATE]
+
+---
+
+Patient: My baby is 2 months old and has a temperature of 38.4°C. She's been warm since this morning.
+
+TriageGuard: Is she confused, very difficult to wake up, or showing any unusual behaviour?
+
+Patient: She's a bit fussier than normal but responsive. No rash.
+
+---
+
+[RESOLUTION]
+Relevant condition: fever
+
+Extracted fields:
+  temperature_celsius: 38.4  (confidence: 0.96)
+  duration_days: 0.5         (confidence: 0.82, approximately half a day)
+  age_years: 0.17            (confidence: 0.95, ~2 months)
+  altered_consciousness: false (confidence: 0.85)
+  stiff_neck_severe_headache: false (confidence: 0.70)
+  non_blanching_rash: false  (confidence: 0.90)
+
+No red flags triggered.
+Rule matched: RULE_FEVER
+  age_years 0.17 < 0.25 AND temperature_celsius 38.4 >= 38 → IMMEDIATE, Emergency Department
+
+TRIAGE NOTE
+Urgency: IMMEDIATE
+Department: Emergency Department
+Applied Rule: Temperature >= 40°C, OR infant under 3 months with any fever >= 38°C — IMMEDIATE, Emergency Department.
+Patient reported: 2-month-old infant with temperature 38.4°C, fever since this morning (approx. 12 hours), fussier than normal but responsive, no rash, no altered consciousness.
+Rule ID: RULE_FEVER

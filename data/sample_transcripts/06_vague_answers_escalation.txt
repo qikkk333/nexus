@@ -1,0 +1,32 @@
+[TRANSCRIPT: Persistent Vague Answers — Low-Confidence Escalation]
+[EXPECTED OUTCOME: ESCALATED — persistent_low_confidence — Human clinician]
+[SCENARIO: Patient cannot or will not give specific enough answers; confidence stays low after 2 follow-up rounds]
+
+---
+
+Patient: I've been having trouble breathing for a while now.
+
+TriageGuard: Did the breathing difficulty start suddenly (within seconds or minutes) or gradually (over hours or days)?
+
+Patient: I'm not really sure, it just sort of happened, I guess it was kind of sudden but maybe not?
+
+TriageGuard: Can the patient speak in full sentences without stopping to catch their breath?
+
+Patient: Sort of, kind of, I mean it depends, I don't know really.
+
+---
+
+[RESOLUTION — after follow-up cap reached]
+Relevant condition: breathing_difficulty
+
+Extraction results after all follow-up rounds:
+  onset: null                          (confidence: 0.35 — ambiguous answer, below 0.6)
+  oxygen_saturation: null              (confidence: 0.0 — never mentioned)
+  able_to_speak_full_sentences: null   (confidence: 0.38 — ambiguous answer, below 0.6)
+
+followup_count = 2 = FOLLOWUP_CAP
+All required fields remain below confidence threshold after 2 follow-up questions.
+
+SYSTEM RESPONSE: ESCALATED TO HUMAN
+Reason: Sufficient information could not be gathered after the maximum number of follow-up questions.
+A clinician should assess this case directly.

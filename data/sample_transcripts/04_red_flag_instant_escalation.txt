@@ -1,0 +1,25 @@
+[TRANSCRIPT: Red Flag Present in First Message — Immediate Escalation, No Follow-Up]
+[EXPECTED OUTCOME: ESCALATED — red_flag — Emergency (human clinician)]
+[SCENARIO: Patient mentions altered consciousness with fever in opening message; red flag fires immediately]
+
+---
+
+Patient: My husband has a very high fever and he's confused and hard to wake up. We can't get him alert.
+
+---
+
+[RESOLUTION — after first message only]
+Relevant condition: fever
+Extracted fields:
+  temperature_celsius: null  (confidence: 0.0, not specified)
+  duration_days: null        (confidence: 0.0, not specified)
+  age_years: null            (confidence: 0.0, not specified)
+  altered_consciousness: true (confidence: 0.92) ← RED FLAG
+
+Escalation triggered immediately: altered_consciousness red flag detected.
+No follow-up questions were generated. No triage note produced.
+
+SYSTEM RESPONSE: ESCALATED TO HUMAN
+Reason: A critical symptom was identified: Confusion, unresponsiveness, or altered mental status.
+This case requires immediate human assessment — rule RULE_FEVER.
+Action: Call emergency services (999/911) immediately. Do not wait.

@@ -1,0 +1,298 @@
+version: "1.0"
+
+confidence_thresholds:
+  usable: 0.8
+  gray_zone_low: 0.6
+  gray_zone_high: 0.8
+  followup_cap: 2
+
+conditions:
+  fever:
+    id: RULE_FEVER
+    display_name: Fever
+    keywords:
+      - fever
+      - temperature
+      - hot
+      - warm
+      - chills
+      - sweating
+      - sweats
+      - febrile
+    required_fields:
+      - name: temperature_celsius
+        type: float
+        description: Body temperature in Celsius
+        ask: "What is the patient's temperature? Please give it in °C or °F."
+      - name: duration_days
+        type: float
+        description: Number of days the fever has lasted
+        ask: "How many days has the fever been present?"
+      - name: age_years
+        type: float
+        description: Patient's age in years
+        ask: "How old is the patient?"
+    red_flag_fields:
+      - name: altered_consciousness
+        type: boolean
+        description: Confusion, unresponsiveness, or altered mental status
+        ask: "Is the patient confused, disoriented, or very difficult to wake up?"
+      - name: stiff_neck_severe_headache
+        type: boolean
+        description: Severe headache combined with stiff neck (possible meningitis indicator)
+        ask: "Does the patient have a severe headache AND a stiff or painful neck?"
+      - name: non_blanching_rash
+        type: boolean
+        description: Rash that does not fade when pressed (possible meningococcal indicator)
+        ask: "Does the patient have a rash that does NOT fade or disappear when you press on it?"
+    urgency_levels:
+      - urgency: IMMEDIATE
+        department: Emergency Department
+        rule_text: "Temperature >= 40°C, OR infant under 3 months with any fever >= 38°C — IMMEDIATE, Emergency Department."
+        expressions:
+          - "temperature_celsius >= 40"
+          - "age_years < 0.25 and temperature_celsius >= 38"
+      - urgency: URGENT
+        department: Urgent Care
+        rule_text: "Temperature >= 38.5°C, OR fever persisting >= 5 days — URGENT, Urgent Care."
+        expressions:
+          - "temperature_celsius >= 38.5"
+          - "duration_days >= 5"
+      - urgency: ROUTINE
+        department: General Practice
+        rule_text: "Mild fever below 38.5°C lasting fewer than 5 days in a non-infant — ROUTINE, General Practice."
+        expressions:
+          - "default"
+
+  injury:
+    id: RULE_INJURY
+    display_name: Injury / Trauma
+    keywords:
+      - injury
+      - injured
+      - fell
+      - fall
+      - hit
+      - cut
+      - wound
+      - trauma
+      - bleed
+      - bleeding
+      - broken
+      - fracture
+      - accident
+      - hurt
+      - sprain
+    required_fields:
+      - name: injury_location
+        type: string
+        description: Body part affected by the injury
+        ask: "Which part of the body was injured?"
+      - name: mechanism
+        type: string
+        description: How the injury occurred (fall, impact, cut, etc.)
+        ask: "How did the injury happen? For example, did you fall, get hit, or cut yourself?"
+      - name: pain_score
+        type: float
+        description: Pain severity on a scale of 0 to 10
+        ask: "On a scale of 0 (no pain) to 10 (worst imaginable), how severe is the pain right now?"
+    red_flag_fields:
+      - name: head_injury_loss_of_consciousness
+        type: boolean
+        description: Head injury with any loss of consciousness
+        ask: "Did the patient hit their head AND lose consciousness, even briefly?"
+      - name: active_major_bleeding
+        type: boolean
+        description: Uncontrolled or heavy active bleeding that has not stopped
+        ask: "Is there heavy or uncontrolled bleeding that has not stopped with pressure?"
+      - name: suspected_spinal
+        type: boolean
+        description: Suspected spinal injury — neck or back pain with numbness or weakness after trauma
+        ask: "Is there neck or back pain, or any numbness or weakness in the limbs, following the trauma?"
+    urgency_levels:
+      - urgency: IMMEDIATE
+        department: Emergency Department
+        rule_text: "Pain score >= 8/10, indicating severe injury requiring immediate assessment — IMMEDIATE, Emergency Department."
+        expressions:
+          - "pain_score >= 8"
+      - urgency: URGENT
+        department: Urgent Care
+        rule_text: "Pain score 5–7/10 with functional impairment — URGENT, Urgent Care."
+        expressions:
+          - "pain_score >= 5"
+      - urgency: ROUTINE
+        department: General Practice
+        rule_text: "Minor injury with pain below 5/10 and no red flags — ROUTINE, General Practice."
+        expressions:
+          - "default"
+
+  chest_pain:
+    id: RULE_CHEST_PAIN
+    display_name: Chest Pain
+    keywords:
+      - chest
+      - heart
+      - cardiac
+      - palpitation
+      - palpitations
+      - pressure
+      - tightness
+      - squeezing
+      - chest pain
+      - angina
+    required_fields:
+      - name: pain_score
+        type: float
+        description: Chest pain severity on a scale of 0 to 10
+        ask: "On a scale of 0 to 10, how severe is the chest pain?"
+      - name: duration_minutes
+        type: float
+        description: Duration of chest pain in minutes
+        ask: "How long has the chest pain been present? Please give the time in minutes."
+      - name: radiation
+        type: boolean
+        description: Pain radiating to arm, jaw, shoulder, or back
+        ask: "Does the pain spread or radiate to your arm, jaw, shoulder, or back?"
+    red_flag_fields:
+      - name: diaphoresis
+        type: boolean
+        description: Heavy sweating, nausea, or dizziness accompanying chest pain
+        ask: "Is the patient sweating heavily, feeling nauseated, or dizzy along with the chest pain?"
+      - name: syncope
+        type: boolean
+        description: Fainting or near-fainting episode
+        ask: "Did the patient faint or nearly faint at any point?"
+    urgency_levels:
+      - urgency: IMMEDIATE
+        department: Emergency Department
+        rule_text: "Chest pain with pain score >= 6/10, OR duration > 15 minutes, OR radiation to arm/jaw/back — IMMEDIATE, Emergency Department. Possible cardiac event."
+        expressions:
+          - "pain_score >= 6"
+          - "duration_minutes > 15"
+          - "radiation == True"
+      - urgency: URGENT
+        department: Urgent Care
+        rule_text: "Chest pain with pain score 3–5/10 and duration <= 15 minutes — URGENT, Urgent Care."
+        expressions:
+          - "pain_score >= 3"
+      - urgency: ROUTINE
+        department: General Practice
+        rule_text: "Mild chest discomfort, low pain score, short duration, no radiation — ROUTINE, General Practice."
+        expressions:
+          - "default"
+
+  breathing_difficulty:
+    id: RULE_BREATHING
+    display_name: Breathing Difficulty
+    keywords:
+      - breath
+      - breathing
+      - breathe
+      - shortness
+      - dyspnea
+      - wheeze
+      - wheezing
+      - asthma
+      - oxygen
+      - suffocating
+      - choking
+      - respiratory
+      - inhale
+      - exhale
+    required_fields:
+      - name: onset
+        type: string
+        description: Whether onset was sudden or gradual
+        ask: "Did the breathing difficulty start suddenly (within seconds or minutes) or gradually (over hours or days)?"
+      - name: oxygen_saturation
+        type: float
+        description: Oxygen saturation percentage (SpO2) if known; null if unknown
+        ask: "Do you know the patient's oxygen saturation reading (SpO2 %)? If not, say 'unknown'."
+      - name: able_to_speak_full_sentences
+        type: boolean
+        description: Whether the patient can speak in full sentences without stopping to catch their breath
+        ask: "Can the patient speak in full sentences without stopping to catch their breath?"
+    red_flag_fields:
+      - name: cyanosis
+        type: boolean
+        description: Blue or grey colouring of lips or fingertips indicating low oxygen
+        ask: "Are the patient's lips or fingertips turning blue or grey?"
+      - name: use_of_accessory_muscles
+        type: boolean
+        description: Visible straining of neck or stomach muscles to breathe
+        ask: "Is the patient visibly straining their neck or abdominal muscles just to breathe?"
+    urgency_levels:
+      - urgency: IMMEDIATE
+        department: Emergency Department
+        rule_text: "Oxygen saturation < 92%, OR unable to speak in full sentences — IMMEDIATE, Emergency Department."
+        expressions:
+          - "oxygen_saturation < 92"
+          - "able_to_speak_full_sentences == False"
+      - urgency: URGENT
+        department: Urgent Care
+        rule_text: "Gradual-onset breathing difficulty with SpO2 >= 92% and maintained speech — URGENT, Urgent Care."
+        expressions:
+          - "onset == 'gradual'"
+      - urgency: ROUTINE
+        department: General Practice
+        rule_text: "Mild, intermittent breathing difficulty, able to speak normally and SpO2 normal — ROUTINE, General Practice."
+        expressions:
+          - "default"
+
+  abdominal_pain:
+    id: RULE_ABDOMINAL
+    display_name: Abdominal Pain
+    keywords:
+      - abdominal
+      - abdomen
+      - stomach
+      - belly
+      - nausea
+      - vomiting
+      - bowel
+      - diarrhea
+      - appendix
+      - gut
+      - cramps
+      - cramping
+      - gastric
+    required_fields:
+      - name: pain_score
+        type: float
+        description: Abdominal pain severity on a scale of 0 to 10
+        ask: "On a scale of 0 to 10, how severe is the abdominal pain?"
+      - name: duration_hours
+        type: float
+        description: Duration of abdominal pain in hours
+        ask: "How many hours has the abdominal pain been going on?"
+      - name: pain_location
+        type: string
+        description: Location of pain in the abdomen (upper, lower right, lower left, central, etc.)
+        ask: "Where exactly in the abdomen is the pain? For example, upper, lower right, around the belly button?"
+    red_flag_fields:
+      - name: rigid_abdomen
+        type: boolean
+        description: Abdomen is hard or board-like to touch (sign of peritonitis)
+        ask: "Is the patient's abdomen hard, rigid, or board-like to the touch?"
+      - name: blood_in_stool_or_vomit
+        type: boolean
+        description: Blood visible in stool or vomit
+        ask: "Has the patient noticed any blood in their stool or vomit?"
+    urgency_levels:
+      - urgency: IMMEDIATE
+        department: Emergency Department
+        rule_text: "Abdominal pain >= 8/10, OR acute onset (< 2 hours) with pain >= 6/10 — IMMEDIATE, Emergency Department."
+        expressions:
+          - "pain_score >= 8"
+          - "duration_hours <= 2 and pain_score >= 6"
+      - urgency: URGENT
+        department: Urgent Care
+        rule_text: "Abdominal pain 4–7/10 or lasting more than 6 hours — URGENT, Urgent Care."
+        expressions:
+          - "pain_score >= 4"
+          - "duration_hours >= 6"
+      - urgency: ROUTINE
+        department: General Practice
+        rule_text: "Mild abdominal discomfort, pain below 4/10, short duration — ROUTINE, General Practice."
+        expressions:
+          - "default"
