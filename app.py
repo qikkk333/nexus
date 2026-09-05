@@ -1,9 +1,10 @@
 import uuid
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
@@ -217,8 +218,6 @@ async def health() -> JSONResponse:
 async def index() -> FileResponse:
     return FileResponse(FRONTEND_DIST / "index.html")
 
-
-app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

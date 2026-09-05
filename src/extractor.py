@@ -10,7 +10,7 @@ from . import rules as rules_module
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "gemini-2.0-flash-lite"
+MODEL_NAME = "gemini-3.5-flash-lite"
 TEMPERATURE = 0.1
 
 
